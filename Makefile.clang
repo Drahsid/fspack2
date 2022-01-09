@@ -1,0 +1,43 @@
+BUILD_DIR = build
+SRC_DIR = src
+C_FILES = $(foreach dir,$(SRC_DIR),$(wildcard $(dir)/*.c))
+CPP_FILES = $(foreach dir,$(SRC_DIR),$(wildcard $(dir)/*.cpp))
+
+O_FILES	 = $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file).o) \
+           $(foreach file,$(CPP_FILES),$(BUILD_DIR)/$(file).o)
+
+TARGET = fspack
+
+I_FLAGS = -Iinclude
+L_FLAGS = -lc
+O_FLAGS = -O0
+
+CC = clang
+CPP = clang++
+CP = cp
+RM = rm
+
+default: all
+
+all: dirs $(BUILD_DIR)/$(TARGET)
+
+dirs:
+	$(foreach dir,$(SRC_DIR),$(shell mkdir -p $(BUILD_DIR)/$(dir)))
+
+clean:
+	$(RM) -rf $(BUILD_DIR)
+
+$(BUILD_DIR)/%.c.o: %.c
+	$(CC) -c $< -o $@ $(I_FLAGS) $(O_FLAGS)
+
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(CPP) -c $< -o $@ $(I_FLAGS) $(O_FLAGS)
+
+$(BUILD_DIR)/$(TARGET): $(O_FILES)
+	$(CC) -o $@ $(O_FILES)
+	$(CP) $(BUILD_DIR)/$(TARGET) $(TARGET)
+
+### Settings
+.SECONDARY:
+.PHONY: all clean default
+SHELL = /bin/bash -e -o pipefail
